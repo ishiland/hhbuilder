@@ -75,7 +75,7 @@ function domReady() {
         var rel = relationshipSelect.value
 
         // simple validation
-        if (!age || age < 1) {
+        if (isNaN(age) || age < 1) {
             alert("please enter a valid age greater than 0.")
             return
         }
