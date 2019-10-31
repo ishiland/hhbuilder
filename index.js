@@ -29,7 +29,7 @@ function domReady() {
     }
 
     // create a unique identifier for each member
-    function getUniqueIdentifier (){
+    function getUniqueIdentifier() {
         return Date.now() + Math.random()
     }
 
@@ -49,8 +49,9 @@ function domReady() {
         var li = document.createElement("li");
         className = "listMember-" + id
         li.className = className
-        li.innerHTML = age + ", " + rel + ", " + smoker + " "
-
+        li.innerHTML = "<strong>Age:</strong> " + age
+        li.innerHTML += " | <strong>Relationship:</strong> " + rel
+        li.innerHTML += " | <strong>Smoker:</strong> " + smoker + " | "
         var removeButton = document.createElement('button');
         removeButton.innerHTML = 'remove'
         removeButton.onclick = removeMember(id)
@@ -65,10 +66,10 @@ function domReady() {
     }
 
     // remove unique identifier and jsonify data
-    function getJSON(){
+    function getJSON() {
         var result = []
-        for(var key in dataStore){
-            if(dataStore.hasOwnProperty(key)){
+        for (var key in dataStore) {
+            if (dataStore.hasOwnProperty(key)) {
                 var value = dataStore[key];
                 result.push(value)
             }
