@@ -1,7 +1,7 @@
 function domReady() {
 
     // store the household members here
-    var dataStore = [];
+    var dataStore = {};
 
     // input selectors
     var ageInput = document.getElementsByName('age')[0]
@@ -11,13 +11,14 @@ function domReady() {
     debugCodeSelector.style.whiteSpace = "pre-wrap"
     var addButton = document.getElementsByClassName('add')[0]
 
+
     // create container and list to display the household members
     function createHouseholdListContainer() {
         var div = document.createElement("div");
         div.className = "listContainer"
         div.style.padding = "25px";
         div.style.margin = "25px 0";
-        div.style.background = "cornflowerblue";
+        div.style.background = "cornflowerblue"; // fancy
         div.style.color = "white";
         div.innerHTML = "Household Members";
         document.getElementsByClassName("builder")[0].append(div);
@@ -27,43 +28,64 @@ function domReady() {
         document.getElementsByClassName("listContainer")[0].append(ul);
     }
 
-    // remove member from datastore
-    function removeMember(i) {
+    // create a unique identifier for each member
+    function getUniqueIdentifier (){
+        return Date.now() + Math.random()
+    }
+
+    // remove member from datastore and dom
+    function removeMember(id) {
         return function () {
-            dataStore.splice(i, 1);
-            updateList()
+            document.getElementsByClassName("listMember-" + id)[0].remove()
+            delete dataStore[id]
         };
     }
 
-    // sync dom with contents of dataStore
-    function updateList() {
-        var householdList = document.getElementsByClassName("householdList")[0]
-        householdList.innerHTML = ''
-        for (var i = 0; i < dataStore.length; i++) {
-            var li = document.createElement("li");
-            li.className = "listMember-" + i
-            li.innerHTML = dataStore[i].age + ", " + dataStore[i].rel + ", " + dataStore[i].smoker + " "
+    // add member to datastore
+    function addMember(age, rel, smoker) {
 
-            var removeButton = document.createElement('button');
-            removeButton.innerHTML = 'remove'
-            removeButton.onclick = removeMember(i)
-            li.append(removeButton)
-            householdList.append(li);
+        var id = getUniqueIdentifier()
+        var householdList = document.getElementsByClassName("householdList")[0]
+        var li = document.createElement("li");
+        className = "listMember-" + id
+        li.className = className
+        li.innerHTML = age + ", " + rel + ", " + smoker + " "
+
+        var removeButton = document.createElement('button');
+        removeButton.innerHTML = 'remove'
+        removeButton.onclick = removeMember(id)
+        li.append(removeButton)
+        householdList.append(li);
+
+        dataStore[id] = {
+            "age": age,
+            "rel": rel,
+            "smoker": smoker
         }
+    }
+
+    // remove unique identifier and jsonify data
+    function getJSON(){
+        var result = []
+        for(var key in dataStore){
+            if(dataStore.hasOwnProperty(key)){
+                var value = dataStore[key];
+                result.push(value)
+            }
+        }
+        return JSON.stringify(result)
     }
 
     // validate form and submit
     function submitForm(e) {
         e.preventDefault();
-        if (!dataStore.length) {
+        if (!Object.keys(dataStore).length) {
             debugCodeSelector.style.display = "none"
-            alert("please add memebers to your household.")
+            alert("please add members to your household.")
             return
         }
-
         // display to debug node
-        var output = JSON.stringify(dataStore)
-        debugCodeSelector.innerHTML = output
+        debugCodeSelector.innerHTML = getJSON()
         debugCodeSelector.style.display = "block"
     }
 
@@ -84,14 +106,8 @@ function domReady() {
             return
         }
 
-        // add to the datastore
-        dataStore.push({
-            "age": age,
-            "rel": rel,
-            "smoker": smokerCheckbox.checked ? "smoker" : "non-smoker"
-        })
-
-        updateList()
+        var smoker = smokerCheckbox.checked ? "yes" : "no"
+        addMember(age, rel, smoker)
     });
 
     createHouseholdListContainer()
